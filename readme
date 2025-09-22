@@ -1,0 +1,57 @@
+🔔 Automated Price Tracker with Email Alerts
+
+A full-stack application that tracks product prices and sends automated email notifications to users when a price drop is detected.
+
+🚀 Features
+
+User authentication with Supabase
+
+Add, view, and delete product URLs to track
+
+Automated email notifications using Nodemailer
+
+Responsive UI for seamless access across devices
+
+🛠️ Tech Stack
+
+Frontend: React.js, CSS
+
+Backend: Node.js, Express.js
+
+Database: Supabase
+
+Email Service: Nodemailer
+
+📸 Screenshots
+
+(Add a few screenshots of your UI here – e.g., dashboard, add product, email alert)
+
+⚡ Getting Started
+1. Clone the Repository
+git clone https://github.com/your-username/price-tracker.git
+cd price-tracker
+
+2. Install Dependencies
+npm install
+
+3. Set Environment Variables
+
+Create a .env file in the root folder and add:
+
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+JWT_SECRET=your_secret
+EMAIL_USER=your_email
+EMAIL_PASS=your_email_password
+PORT=3000
+
+4. Run the App
+npm start
+
+📧 Example Email Alert
+
+"The price of Product XYZ has dropped to ₹799! Click here to check it out."
+
+🤝 Contribution
+
+Contributions are welcome! Feel free to fork the repo, open issues, and submit PRs.
