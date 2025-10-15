@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const API = import.meta.env.VITE_BACKEND_URL;
-
+const API = import.meta.env.VITE_BACKEND_URL; // Make sure your .env file has this
 
 function Signup() {
   const [email, setEmail] = useState('');
@@ -12,7 +11,7 @@ function Signup() {
 
   const handleSignup = async () => {
     try {
-      const res = await axios.post('http://localhost:3001/signup', { email, password });
+      const res = await axios.post(`${API}/signup`, { email, password });
       if (res.data?.token) {
         localStorage.setItem('token', res.data.token);
         navigate('/dashboard');
@@ -27,10 +26,22 @@ function Signup() {
   return (
     <div className="auth-container">
       <h2>Sign Up</h2>
-      <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-      <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+      <input
+        placeholder="Email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+      />
+      <input
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+      />
       <button onClick={handleSignup}>Sign Up</button>
-      <p>Already have an account? <span onClick={() => navigate('/')}>Login</span></p>
+      <p>
+        Already have an account?{' '}
+        <span onClick={() => navigate('/')}>Login</span>
+      </p>
     </div>
   );
 }

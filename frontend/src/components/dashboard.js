@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
-const API = import.meta.env.VITE_BACKEND_URL;
 
+const API = import.meta.env.VITE_BACKEND_URL; // 👈 this already points to your Render backend
 
 function Dashboard() {
   const [url, setUrl] = useState('');
@@ -14,7 +14,7 @@ function Dashboard() {
   // Fetch products
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:3001/products', { headers });
+      const res = await axios.get(`${API}/products`, { headers }); // 👈 updated
       setProducts(res.data);
     } catch (err) {
       console.error(err);
@@ -30,7 +30,7 @@ function Dashboard() {
   // Add product
   const addProduct = async () => {
     try {
-      await axios.post('http://localhost:3001/product', { url }, { headers });
+      await axios.post(`${API}/product`, { url }, { headers }); // 👈 updated
       setUrl('');
       fetchProducts();
       setMessage('✅ Product added — confirmation email sent to your login email.');
@@ -44,7 +44,7 @@ function Dashboard() {
   // Check price
   const checkPrice = async (id) => {
     try {
-      await axios.post(`http://localhost:3001/check/${id}`, {}, { headers });
+      await axios.post(`${API}/check/${id}`, {}, { headers }); // 👈 updated
       fetchProducts();
       setMessage('📩 Email sent to your login email with the latest price.');
       setTimeout(() => setMessage(null), 4000);
@@ -57,8 +57,7 @@ function Dashboard() {
   // Delete product
   const deleteProduct = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/product/${id}`, { headers });
-      // Remove from local state so UI updates immediately
+      await axios.delete(`${API}/product/${id}`, { headers }); // 👈 updated
       setProducts(prev => prev.filter(p => p.id !== id));
       setMessage('🗑️ Product deleted successfully');
       setTimeout(() => setMessage(null), 3000);
