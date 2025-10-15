@@ -13,20 +13,34 @@ const cheerio = require('cheerio');
 // ===================
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// ✅ CORS configuration — allow your deployed frontend
+app.use(
+  cors({
+    origin: [
+      "https://your-frontend-name.vercel.app", // replace with your actual frontend URL
+      "http://localhost:5173" // optional: keep for local testing
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 // ===================
-// Supabase client - uses env vars SUPABASE_URL & SUPABASE_ANON_KEY
+// Supabase client
 // ===================
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
 // ===================
-// Default price selector
+// Constants
 // ===================
 const DEFAULT_SELECTOR = 'span.a-price-whole';
 
 // ===================
-// Helper: fetch price (basic scraping)
+// Helper: fetch price
 // ===================
 async function fetchPrice(url) {
   const { data } = await axios.get(url, { timeout: 15000 });
@@ -38,12 +52,12 @@ async function fetchPrice(url) {
 }
 
 // ===================
-// Helper: send email (SMTP via Gmail)
+// Helper: send email
 // ===================
 async function sendEmail(to, subject, text, html = null) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
   });
 
   await transporter.sendMail({
@@ -51,12 +65,12 @@ async function sendEmail(to, subject, text, html = null) {
     to,
     subject,
     text,
-    html: html || text
+    html: html || text,
   });
 }
 
 // ===================
-// Middleware: auth (expects Authorization header = token)
+// Middleware: auth
 // ===================
 function authMiddleware(req, res, next) {
   const token = req.headers['authorization'];
@@ -80,8 +94,12 @@ app.post('/signup', async (req, res) => {
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
   try {
-    // prevent duplicate signups
-    const { data: existing } = await supabase.from('users').select('id').eq('email', email).limit(1).maybeSingle();
+    const { data: existing } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle();
     if (existing) return res.status(400).json({ error: 'Email already registered' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -127,7 +145,7 @@ app.post('/login', async (req, res) => {
 // PRODUCT ROUTES
 // ===================
 
-// Add product (authenticated)
+// Add product
 app.post('/product', authMiddleware, async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'URL is required' });
@@ -164,7 +182,7 @@ app.post('/product', authMiddleware, async (req, res) => {
 
     res.json({
       message: 'Product added and confirmation email sent',
-      product: productData[0]
+      product: productData[0],
     });
   } catch (err) {
     res.status(400).json({ error: err.message || 'Failed to add product' });
@@ -186,7 +204,7 @@ app.get('/products', authMiddleware, async (req, res) => {
   }
 });
 
-// Check price & notify (authenticated)
+// Check price
 app.post('/check/:productId', authMiddleware, async (req, res) => {
   try {
     const { data: product, error: productError } = await supabase
@@ -247,30 +265,23 @@ app.post('/check/:productId', authMiddleware, async (req, res) => {
   }
 });
 
-// Delete product (authenticated)
+// Delete product
 app.delete('/product/:productId', authMiddleware, async (req, res) => {
   try {
-    const productId = req.params.productId;
-
-    // Fetch the product first to confirm ownership
     const { data: product, error: fetchError } = await supabase
       .from('products')
       .select('*')
-      .eq('id', productId)
-      .eq('user_id', req.userId) // ensure this product belongs to current user
+      .eq('id', req.params.productId)
+      .eq('user_id', req.userId)
       .maybeSingle();
 
     if (fetchError) throw fetchError;
+    if (!product) return res.status(404).json({ error: 'Product not found or not owned by user' });
 
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found or not owned by user' });
-    }
-
-    // Delete the product
     const { data: deleted, error: deleteError } = await supabase
       .from('products')
       .delete()
-      .eq('id', productId)
+      .eq('id', req.params.productId)
       .eq('user_id', req.userId)
       .select();
 
@@ -283,10 +294,15 @@ app.delete('/product/:productId', authMiddleware, async (req, res) => {
   }
 });
 
-
+// ===================
+// Default route
+// ===================
+app.get('/', (req, res) => {
+  res.send('✅ Backend running successfully!');
+});
 
 // ===================
-// Start server (port 3001)
+// Start server (Render auto-port)
 // ===================
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
