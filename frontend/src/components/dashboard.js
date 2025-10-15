@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
+const API = import.meta.env.VITE_BACKEND_URL;
+
 
 function Dashboard() {
   const [url, setUrl] = useState('');
