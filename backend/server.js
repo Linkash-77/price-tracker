@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "https://your-frontend-name.vercel.app", // replace with your actual frontend URL
+      "https://price-tracker-mauve-seven.vercel.app/", // replace with your actual frontend URL
       "http://localhost:5173" // optional: keep for local testing
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
